@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title> WEBSERVER </title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.3.0/Chart.bundle.js"></script>
+	<script
+  src="https://code.jquery.com/jquery-3.4.1.js"
+  integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+  crossorigin="anonymous"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		function updateChart(data) {
+			var len = data.length;
+			//console.log(len);
+			var tmp_data = {
+				H_R: [],
+				SpO2: [], 
+				time: []
+			};
+			document.getElementById('H_R').innerHTML = data[0].H_R; //update the date
+			document.getElementById('SpO2').innerHTML = data[0].SpO2; //update the date
+			//document.getElementById('winspeed').innerHTML = data[0].winspeed; //update the date
+
+			data.reverse();
+
+			for(var i=0; i<len; i++){
+					tmp_data.H_R.push(data[i].H_R);
+					tmp_data.SpO2.push(data[i].SpO2);
+					//tmp_data.win.push(data[i].winspeed);
+					tmp_data.time.push(data[i].Date_Time);
+			}
+			//console.log(tmp_data);
+			myChart.data.labels = tmp_data.time;
+			myChart.data.datasets[0].data = tmp_data.H_R;
+			myChart.data.datasets[1].data = tmp_data.SpO2;
+			//myChart.data.datasets[0].data = tmp_data.win;
+			myChart.update();
+			
+			readwin();
+		}
+		
+		var socket = io.connect();
+		socket.on("data", function(data){
+			data = JSON.parse(data);
+			updateChart(data);
+		});
+		
+
+	</script>
+	<style type="text/css">
+		#wrapper{
+			width: 1200px;
+			margin: auto;
+
+		}
+		#header{
+			width: 1200px;
+			height: 105px;
+			background-color: #B3EE3A;
+
+		}
+		#menu{
+			width: 1200px;
+			height: 80px;
+			background-color: #09ff
+		}
+		#left{
+			width: 250px;
+			height: 400px;
+			background-color: gray;
+			float: left;	
+		}
+		#main{
+			width: 700px;
+			height: 400px;
+			background-color: white;
+			float:left;
+		}
+		#right{
+			width: 250px;
+			height: 400px;
+			background-color: gray;
+			float:left;
+		}
+		#footer{
+			width:1200px;
+			height: 100px;
+			clear: both;
+		}
+		.slidecontainer{
+			width: 65%;
+		}
+		.slide{
+			-webkit-appearance: none;
+  			width: 100%;
+  			height: 25px;
+  			background: #d3d3d3;
+  			outline: none;
+  			opacity: 0.7;
+  			-webkit-transition: .2s;
+  			transition: opacity .2s;
+		}
+		.slider:hover {
+  		opacity: 1;
+		}
+
+		.slider::-webkit-slider-thumb {
+  		-webkit-appearance: none;
+  		appearance: none;
+  		width: 25px;
+  		height: 25px;
+  		background: #4CAF50;
+  		cursor: pointer;
+		}
+
+		.slider::-moz-range-thumb {
+  		width: 25px;
+  		height: 25px;
+  		background: #4CAF50;
+  		cursor: pointer;
+		}
+	</style>
+</head>
+	<body>
+		<div id="wrapper">
+		<div id="header">
+			<p style="font-size: 35px;margin-top: 20px;margin-left:400px  "><b>ĐỒ ÁN TỐT NGHIỆP
+				<br>
+			<p style="margin-top: 10px; text-align: center;font-size: 20px;">Đề tài: Hệ thống kiểm tra sức khỏe và quản lý dữ liệu sử dụng Max30100 và Arduino Wemos D1</p></b></p>
+			
+		</div>
+
+		<div id="menu">
+			<span style="font-size: 20px; line-height: 4.5; width: 200; padding-left: 20px;">SVTH:Ngô Xuân Hoàng</span>
+			<span style="font-size: 20px;padding-left: 270px;  ">Lớp:D15CQDT01</span>
+			<span style="font-size: 20px; line-height: 5.5; font-weight:400;width: 300;padding-left: 250px ">MSV:B15DCDT081</span>
+		</div>
+		<div id="left">
+			<h2><font color="green" style="padding-left: 70px">Manual</font></h2>
+			<p><ins>Bước 1:</ins>Xin vui lòng đặt ngón tay của bạn vào thiết bị đo</p>
+			<p><ins>Bước 2:</ins>Xem kết qủa đo của bạn trên màn hình </p>
+			<p><ins>Bước 3:</ins>Sau đó xem lời khuyên dành cho bạn ở mục HELP</p>
+	
+		</div>
+		<div id="main">
+		<p style="margin-left: 300px;font-size: 20px">ĐỒ THỊ MỔ TẢ </p>
+		<div class="chart-container" style="position: relative; width:90%; margin: auto; ">
+			<canvas id="myChart"></canvas>
+		</div>
+		<script>
+		var ctx = document.getElementById('myChart').getContext('2d');
+		var myChart = new Chart(ctx, {
+    	type: 'line',
+    	data: {
+        labels: [1],
+        datasets: [{
+            label: 'Hreate Rate',
+            data: [],
+            borderColor: 'red',
+            borderWidth: 1
+        },{
+        	label: 'SpO2',
+            data: [],
+            borderColor: '#333',
+            borderWidth: 1
+         }]
+
+    	},
+    	options: {
+        	scales: {
+            	yAxes: [{
+                	ticks: {
+                    	beginAtZero: true
+                	}
+            	}]
+        	}
+    	}
+		});
+		</script>
+	</div>
+		<div id="right">
+			<h2><font color="green">Giá Trị Đo Được:</font></h2>
+			<table>
+				<tr>HeartRate : <p id="H_R" style="padding-left: 100px">0 </p></tr>
+				<tr>SpO2 : <p id="SpO2" style="padding-left: 110px;">0 </p></tr>
+				<!-- <tr><font color="red">Note: Nhịp tim hiện tại của bạn</font></tr> -->
+
+				<!-- <script >
+					function readwin(){
+						//console.log("debug")
+						var x = document.getElementById("H_R").innerHTML;
+						//console.log(x);
+						if(x<80)
+						{
+							document.getElementById("H_R").innerHTML = "HeartRate Hight";
+						}
+						else if(x>55){
+							document.getElementById("H_R").innerHTML="HeartRate Low";
+						}
+						else{
+							document.getElementById("H_R").innerHTML="Normal!";
+						}
+					}
+					
+				</script> -->
+			</table>
+		</div>
+		<div id="footer">
+			<h2>HELP</h2>
+			<a href="https://hellobacsi.com/song-khoe/bi-quyet-song-khoe/cach-lam-giam-nhip-tim-dap-nhanh/">READ MORE</a>
+		</div>	
+	</body>
+</html>
